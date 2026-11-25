@@ -83,5 +83,5 @@ app/
 pyproject.toml     dependencies (uv), pytest and ruff config
 tests/             fakes only; no network
 scripts/           setup_gcp.sh, deploy.sh, smoke_test.sh
-docs/              mcp-session-log.md, iam-notes.md
+docs/              commands-runbook.md, mcp-session-log.md, iam-notes.md
 ```
