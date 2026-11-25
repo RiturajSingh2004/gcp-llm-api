@@ -33,6 +33,25 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8080/v1/chat `
 
 ---
 
+## 1b. Local Container Verification (Phase B)
+
+```powershell
+# Start Docker Desktop (if not already running)
+Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+
+# Build and run container using .env (so the key stays out of shell history)
+docker build -t llm-api .
+docker run --rm -p 8080:8080 --env-file .env llm-api
+
+# Test endpoints from another terminal
+Invoke-RestMethod http://localhost:8080/healthz
+Invoke-RestMethod -Method Post -Uri http://localhost:8080/v1/chat `
+  -ContentType "application/json" `
+  -Body '{"prompt": "Explain Cloud Run in one sentence."}'
+```
+
+---
+
 ## 2. Install & Authenticate `gcloud` CLI (Phase C)
 
 ```powershell
@@ -228,6 +247,12 @@ gcloud storage rm -r "gs://${PROJECT_ID}_cloudbuild"
 gcloud projects delete llm-api-lab
 ```
 
+### Local Docker cleanup (optional, frees disk space only)
+```powershell
+docker rmi llm-api
+docker builder prune -f
+```
+
 ---
 
 ## 9. Challenges & Troubleshooting Log
@@ -285,3 +310,8 @@ Real issues encountered during setup and deployment on Windows + GCP free tier, 
 - **Symptom:** `UnrecognizedArgumentsError` when passing `AND` in `gcloud logging read` filter arguments, or errors on shell operators.
 - **Cause:** The `gcloud` MCP tool executes single `gcloud` commands directly without a shell and rejects pipes (`|`), chaining (`&&`), subshells (`$()`), and multi-token filter strings with spaces.
 - **Fix:** Pass single-token filters (e.g., `resource.type=cloud_run_revision`) and one `gcloud` command per tool call.
+
+### 11. Local Docker `dockerDesktopLinuxEngine` pipe not found
+- **Symptom:** `failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine` when running `docker build` or `docker run`.
+- **Cause:** Docker Desktop was installed, but the Docker daemon wasn't running yet.
+- **Fix:** Start Docker Desktop (`Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"`), wait for `docker info` to succeed, then run `docker build` and `docker run --rm -p 8080:8080 --env-file .env llm-api`.
